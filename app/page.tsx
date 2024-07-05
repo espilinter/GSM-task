@@ -10,14 +10,16 @@ export default function Home() {
   interface taskType {
     id: string;
     text: string;
-    done: boolean;
+    done: string;
   }
   const inputRef = useRef<HTMLInputElement>(null)
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
   const [tasks, setTasks] = useState<taskType[]>([])
+  const [deleteItem, setDeleteItem] = useState<boolean>(false)
+  const [count, setCount] = useState<number>(10)
   function addTask() {
     if (inputRef.current) {
-      console.log(inputRef.current.value);
-      const object: taskType = { id: inputRef.current.value, text: inputRef.current.value, done: false }
+      const object: taskType = { id: inputRef.current.value, text: inputRef.current.value, done: "false" }
       setTasks([...tasks, object])
     }
   }
@@ -26,7 +28,7 @@ export default function Home() {
     let object = [...tasks]
     tasks.map((item, index) => {
       if (item.id === id) {
-        object[index].done = true;
+        object[index].done = "true";
       }
     })
     setTasks(object)
@@ -36,21 +38,47 @@ export default function Home() {
     let object = [...tasks]
     tasks.map((item, index) => {
       if (item.id === id) {
-        object[index].done = false;
+        object[index].done = "false";
       }
     })
     setTasks(object)
   }
 
   function deleteHandler(id: string) {
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current)
+    }
     let object = [...tasks]
     tasks.map((item, index) => {
       if (item.id === id) {
-        object.splice(index, 1)
+        object[index].done = "pending";
+        setDeleteItem(true);
+        let i = 10;
+        intervalIdRef.current = setInterval(() => {
+          i--
+          setCount(i)
+          console.log(deleteItem);
+          if (i === 0) {
+            object.splice(index, 1)
+            setDeleteItem(false)
+            if (intervalIdRef.current) {
+              clearInterval(intervalIdRef.current)
+            }
+            i = 10
+          }
+        }, 1000)
       }
     })
     setTasks(object)
   }
+
+  function clearHandler() {
+    setDeleteItem(false)
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current)
+    }
+  }
+
 
   return (
     <main className="flex flex-col items-center my-20 m-auto gap-8 max-w-[1024px] w-full">
@@ -70,7 +98,7 @@ export default function Home() {
         <span className='text-lg font-bold'>درحال انجام</span>
         <div className='flex flex-col'>
           {tasks.map((item) => (
-            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3 ${item.done === true ? "hidden" : ""}`}>
+            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3 ${item.done === "true" ? "hidden" : ""}`}>
               <div className='flex gap-2 items-center' onClick={() => { taskDone(item.id) }}>
                 <Image className='' src={circle} alt='circle icon' width={16} height={16} />
                 <span className=''>{item.text}</span>
@@ -93,16 +121,16 @@ export default function Home() {
             <div className='rounded-[4px] border size-6 flex items-center justify-center'><Image src={trash} alt='trash icon' width={16} height={16} /></div>
           </div> */}
         </div>
-        <div className='bg-neutral-200 p-2 rounded-md flex items-center justify-between'>
-          <p className='text-neutral-800 text-sm'>00:09 ثانیه برای بازگرداندن فرصت دارید</p>
-          <div className='bg-neutral-400 rounded-md p-1'><Image src={back} alt="return icon" width={14} height={14}></Image></div>
-        </div>
+        {deleteItem && <div className='bg-neutral-200 p-2 rounded-md flex items-center justify-between'>
+          <p className='text-neutral-800 text-sm'>{count} ثانیه برای بازگرداندن فرصت دارید</p>
+          <div className='bg-neutral-400 rounded-md p-1' onClick={clearHandler}><Image src={back} alt="return icon" width={14} height={14}></Image></div>
+        </div>}
       </div>
       <div className='flex border rounded-lg flex-col gap-4 p-3 w-full'>
         <span className='text-lg font-bold'>انجام شده</span>
         <div className='flex flex-col'>
           {tasks.map((item) => (
-            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3 ${item.done === true ? "" : "hidden"}`} onClick={() => { taskNotDone(item.id) }}>
+            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3 ${item.done === "true" ? "" : "hidden"}`} onClick={() => { taskNotDone(item.id) }}>
               <div className='flex gap-2 items-center'>
                 <Image className='' src={fill} alt='circle icon' width={16} height={16} />
                 <span className=''>{item.text}</span>
