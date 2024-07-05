@@ -11,72 +11,82 @@ export default function Home() {
   interface taskType {
     id: string;
     text: string;
-    done: string;
   }
+  interface state {
+    done: taskType[]
+    pending: taskType[]
+  }
+
   const inputRef = useRef<HTMLInputElement>(null)
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
-  const [tasks, setTasks] = useState<taskType[]>([])
+  const [tasks, setTasks] = useState<state>({ done: [], pending: [] })
   const [deleteItem, setDeleteItem] = useState<boolean>(false)
+  const [deletedItemData, setDeletedItemData] = useState<taskType>({ id: "", text: "" })
   const [count, setCount] = useState<number>(10)
 
   useEffect(() => {
     setTasks(JSON.parse(localStorage.getItem("tasks") || ""))
   }, [])
 
-  function addToLocale(arr: taskType[]) {
+  function addToLocale(arr: state) {
     localStorage.setItem("tasks", JSON.stringify(arr))
   }
 
   function addTask() {
     if (inputRef.current) {
-      const object: taskType = { id: inputRef.current.value, text: inputRef.current.value, done: "false" }
-      setTasks([...tasks, object])
-      addToLocale([...tasks, object])
+      const object: taskType = { id: inputRef.current.value, text: inputRef.current.value }
+      let newTasks = { ...tasks }
+      newTasks.pending.push(object)
+      setTasks(newTasks)
+      addToLocale(newTasks)
       inputRef.current.value = "";
     }
   }
 
   function taskDone(id: string) {
-    let array = [...tasks]
-    tasks.map((item, index) => {
+    let newTasks = { ...tasks }
+    tasks.pending.map((item, index) => {
       if (item.id === id) {
-        array[index].done = "true";
+        newTasks.done.push(item)
+        newTasks.pending.splice(index, 1)
       }
     })
-    setTasks(array)
-    addToLocale(array)
+    setTasks(newTasks)
+    addToLocale(newTasks)
   }
 
   function taskNotDone(id: string) {
-    let array = [...tasks]
-    tasks.map((item, index) => {
+    let newTasks = { ...tasks }
+    tasks.done.map((item, index) => {
       if (item.id === id) {
-        array[index].done = "false";
+        newTasks.pending.push(item)
+        newTasks.done.splice(index, 1)
       }
     })
-    setTasks(array)
-    addToLocale(array)
+    setTasks(newTasks)
+    addToLocale(newTasks)
   }
 
   function deleteHandler(id: string) {
     if (intervalIdRef.current) {
       clearInterval(intervalIdRef.current)
     }
-    let array = [...tasks]
-    tasks.map((item, index) => {
+    let newTasks = { ...tasks }
+    tasks.pending.map((item, index) => {
       if (item.id === id) {
-        array[index].done = "pending";
-        setTasks(array)
-        addToLocale(array)
+        setDeletedItemData(item)
+        newTasks.pending.splice(index, 1)
+        setTasks(newTasks)
+        addToLocale(newTasks)
         setDeleteItem(true);
         let i = 10;
         intervalIdRef.current = setInterval(() => {
           i--
           setCount(i)
           if (i === 0) {
-            array.splice(index, 1)
-            setTasks(array)
-            addToLocale(array)
+            newTasks.pending.splice(index, 1)
+            setTasks(newTasks)
+            addToLocale(newTasks)
             setDeleteItem(false)
             if (intervalIdRef.current) {
               clearInterval(intervalIdRef.current)
@@ -90,17 +100,12 @@ export default function Home() {
 
   function clearHandler() {
     setDeleteItem(false)
-    let array = [...tasks]
-    tasks.map((item, index) => {
-      if (item.done === "pending") {
-        array[index].done = "false";
-      }
-    })
+    let newTasks = { ...tasks }
+    newTasks.pending.push(deletedItemData)
     if (intervalIdRef.current) {
       clearInterval(intervalIdRef.current)
     }
   }
-
 
   return (
     <main className="flex flex-col items-center my-20 m-auto gap-8 max-w-[1024px] w-full">
@@ -126,8 +131,8 @@ export default function Home() {
       <div className='flex border rounded-lg flex-col gap-4 p-3 w-full'>
         <span className='text-lg font-bold'>درحال انجام</span>
         <div className='flex flex-col'>
-          {tasks.map((item, index) => (
-            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3 ${item.done === "false" ? "" : "hidden"}`} key={item.id + "-" + index}>
+          {tasks.pending.map((item, index) => (
+            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3`} key={item.id + "-" + index}>
               <div className='flex gap-2 items-center' onClick={() => { taskDone(item.id) }}>
                 <Image className='' src={circle} alt='circle icon' width={16} height={16} />
                 <span className=''>{item.text}</span>
@@ -144,8 +149,8 @@ export default function Home() {
       <div className='flex border rounded-lg flex-col gap-4 p-3 w-full'>
         <span className='text-lg font-bold'>انجام شده</span>
         <div className='flex flex-col'>
-          {tasks.map((item, index) => (
-            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3 ${item.done === "true" ? "" : "hidden"}`} onClick={() => { taskNotDone(item.id) }} key={item.id + "-" + index}>
+          {tasks.done.map((item, index) => (
+            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3`} onClick={() => { taskNotDone(item.id) }} key={item.id + "-" + index}>
               <div className='flex gap-2 items-center'>
                 <Image className='' src={fill} alt='circle icon' width={16} height={16} />
                 <span className=''>{item.text}</span>
