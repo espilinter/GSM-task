@@ -120,9 +120,9 @@ export default function Home() {
         <div className='flex border rounded-lg flex-col gap-1 p-3 w-[calc(33%-16px)] h-[115px]'>
           <span className='text-base font-bold'>گزارش موفقیت</span>
           <div className='flex gap-4 items-end'>
-            <SuccessChart />
+            <SuccessChart completed={tasks.done.length} pending={tasks.pending.length} />
             <div className='flex flex-col gap-1'>
-              <span className='text-base font-bold'>54 از 65</span>
+              <span className='text-base font-bold'>{tasks.done.length} از {tasks.done.length + tasks.pending.length}</span>
               <span className=''>تسک انجام شده است</span>
             </div>
           </div>

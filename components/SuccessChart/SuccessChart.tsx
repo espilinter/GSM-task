@@ -1,10 +1,13 @@
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
-
-const SuccessChart = () => {
+interface propsType {
+    completed: number,
+    pending: number
+}
+const SuccessChart: React.FC<propsType> = ({ completed, pending }) => {
     const data = [
-        { name: 'Completed', value: 1, color: '#1f1f46' },
-        { name: 'Pending', value: 2, color: '#28af65' },
+        { name: 'انجام شده', value: completed, color: '#1f1f46' },
+        { name: 'در حال انجام', value: pending, color: '#28af65' },
     ];
 
     return (
