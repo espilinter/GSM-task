@@ -4,104 +4,64 @@ import trash from "@/public/images/trash.png"
 import circle from "@/public/images/circle.png"
 import fill from "@/public/images/fill.png"
 import back from "@/public/images/return.png"
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import SuccessChart from '@/components/SuccessChart/SuccessChart'
-
+import useTaskStore from '@/store/taskStore'
 export default function Home() {
   interface taskType {
     id: string;
     text: string;
   }
-  interface state {
-    done: taskType[]
-    pending: taskType[]
-  }
 
+  const { completedTasks, pendingTasks, addCompletedTasks, addPendingTasks, removeCompletedTasks, removePendingTasks } = useTaskStore();
   const inputRef = useRef<HTMLInputElement>(null)
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
-  const [tasks, setTasks] = useState<state>({ done: [], pending: [] })
   const [deleteItem, setDeleteItem] = useState<boolean>(false)
   const [deletedItemData, setDeletedItemData] = useState<taskType>({ id: "", text: "" })
   const [count, setCount] = useState<number>(10)
 
-  useEffect(() => {
-    setTasks(JSON.parse(localStorage.getItem("tasks") || ""))
-  }, [])
-
-  function addToLocale(arr: state) {
-    localStorage.setItem("tasks", JSON.stringify(arr))
-  }
-
   function addTask() {
     if (inputRef.current) {
-      const object: taskType = { id: inputRef.current.value, text: inputRef.current.value }
-      let newTasks = { ...tasks }
-      newTasks.pending.push(object)
-      setTasks(newTasks)
-      addToLocale(newTasks)
+      const object: taskType = { id: `${Date.now()}`, text: inputRef.current.value }
+      addPendingTasks(object)
       inputRef.current.value = "";
     }
   }
 
-  function taskDone(id: string) {
-    let newTasks = { ...tasks }
-    tasks.pending.map((item, index) => {
-      if (item.id === id) {
-        newTasks.done.push(item)
-        newTasks.pending.splice(index, 1)
-      }
-    })
-    setTasks(newTasks)
-    addToLocale(newTasks)
+  function taskDone(item: taskType) {
+    addCompletedTasks(item)
+    removePendingTasks(item.id)
   }
 
-  function taskNotDone(id: string) {
-    let newTasks = { ...tasks }
-    tasks.done.map((item, index) => {
-      if (item.id === id) {
-        newTasks.pending.push(item)
-        newTasks.done.splice(index, 1)
-      }
-    })
-    setTasks(newTasks)
-    addToLocale(newTasks)
+  function taskNotDone(item: taskType) {
+    addPendingTasks(item)
+    removeCompletedTasks(item.id)
   }
 
-  function deleteHandler(id: string) {
+  function deleteHandler(item: taskType) {
     if (intervalIdRef.current) {
       clearInterval(intervalIdRef.current)
     }
-    let newTasks = { ...tasks }
-    tasks.pending.map((item, index) => {
-      if (item.id === id) {
-        setDeletedItemData(item)
-        newTasks.pending.splice(index, 1)
-        setTasks(newTasks)
-        addToLocale(newTasks)
-        setDeleteItem(true);
-        let i = 10;
-        intervalIdRef.current = setInterval(() => {
-          i--
-          setCount(i)
-          if (i === 0) {
-            newTasks.pending.splice(index, 1)
-            setTasks(newTasks)
-            addToLocale(newTasks)
-            setDeleteItem(false)
-            if (intervalIdRef.current) {
-              clearInterval(intervalIdRef.current)
-            }
-            i = 10
-          }
-        }, 1000)
+    setDeletedItemData(item)
+    removePendingTasks(item.id)
+    setDeleteItem(true);
+    setCount(10)
+    let i = 10;
+    intervalIdRef.current = setInterval(() => {
+      i--
+      setCount(i)
+      if (i < 1) {
+        setDeleteItem(false)
+        if (intervalIdRef.current) {
+          clearInterval(intervalIdRef.current)
+        }
       }
-    })
+    }, 1000)
   }
 
   function clearHandler() {
     setDeleteItem(false)
-    let newTasks = { ...tasks }
-    newTasks.pending.push(deletedItemData)
+    addPendingTasks(deletedItemData)
     if (intervalIdRef.current) {
       clearInterval(intervalIdRef.current)
     }
@@ -120,9 +80,9 @@ export default function Home() {
         <div className='flex border rounded-lg flex-col gap-1 p-3 w-[calc(33%-16px)] h-[115px]'>
           <span className='text-base font-bold'>گزارش موفقیت</span>
           <div className='flex gap-4 items-end'>
-            <SuccessChart completed={tasks.done.length} pending={tasks.pending.length} />
+            <SuccessChart completed={completedTasks.length} pending={pendingTasks.length} />
             <div className='flex flex-col gap-1'>
-              <span className='text-base font-bold'>{tasks.done.length} از {tasks.done.length + tasks.pending.length}</span>
+              <span className='text-base font-bold'>{completedTasks.length} از {completedTasks.length + pendingTasks.length}</span>
               <span className=''>تسک انجام شده است</span>
             </div>
           </div>
@@ -131,13 +91,13 @@ export default function Home() {
       <div className='flex border rounded-lg flex-col gap-4 p-3 w-full'>
         <span className='text-lg font-bold'>درحال انجام</span>
         <div className='flex flex-col'>
-          {tasks.pending.map((item, index) => (
+          {pendingTasks.map((item, index) => (
             <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3`} key={item.id + "-" + index}>
-              <div className='flex gap-2 items-center' onClick={() => { taskDone(item.id) }}>
+              <div className='flex gap-2 items-center' onClick={() => { taskDone(item) }}>
                 <Image className='' src={circle} alt='circle icon' width={16} height={16} />
                 <span className=''>{item.text}</span>
               </div>
-              <div className='rounded-[4px] border size-6 flex items-center justify-center' id={item.id} onClick={() => { deleteHandler(item.id) }}><Image src={trash} alt='trash icon' width={16} height={16} /></div>
+              <div className='rounded-[4px] border size-6 flex items-center justify-center' id={item.id} onClick={() => { deleteHandler(item) }}><Image src={trash} alt='trash icon' width={16} height={16} /></div>
             </div>
           ))}
         </div>
@@ -149,8 +109,8 @@ export default function Home() {
       <div className='flex border rounded-lg flex-col gap-4 p-3 w-full'>
         <span className='text-lg font-bold'>انجام شده</span>
         <div className='flex flex-col'>
-          {tasks.done.map((item, index) => (
-            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3`} onClick={() => { taskNotDone(item.id) }} key={item.id + "-" + index}>
+          {completedTasks.map((item, index) => (
+            <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3`} onClick={() => { taskNotDone(item) }} key={item.id + "-" + index}>
               <div className='flex gap-2 items-center'>
                 <Image className='' src={fill} alt='circle icon' width={16} height={16} />
                 <span className=''>{item.text}</span>

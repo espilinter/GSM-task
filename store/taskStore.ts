@@ -28,7 +28,7 @@ const taskStore = (set: any) => ({
 
 const useTaskStore = create<Actions>()(devtools(
     persist(taskStore, {
-        name: "tasksLocal"
+        name: "tasks"
     })
 ))
 
