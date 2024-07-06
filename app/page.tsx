@@ -113,7 +113,7 @@ export default function Home() {
             <div className={`flex justify-between items-center [&:not(:last-child)]:border-b p-3`} onClick={() => { taskNotDone(item) }} key={item.id + "-" + index}>
               <div className='flex gap-2 items-center'>
                 <Image className='' src={fill} alt='circle icon' width={16} height={16} />
-                <span className=''>{item.text}</span>
+                <span className='line-through'>{item.text}</span>
               </div>
             </div>
           ))}
