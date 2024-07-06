@@ -1,7 +1,4 @@
-export interface taskType {
-    id: string;
-    text: string;
-}
+import { taskType } from "@/types/taskType";
 
 export interface Actions {
     completedTasks: taskType[],

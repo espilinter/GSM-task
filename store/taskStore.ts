@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { taskType, Actions } from './taskStoreType'
+import { Actions } from './taskStoreType'
+import { taskType } from '@/types/taskType'
 const taskStore = (set: any) => ({
     completedTasks: [] as taskType[],
     pendingTasks: [] as taskType[],
