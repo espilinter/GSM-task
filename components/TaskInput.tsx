@@ -16,9 +16,9 @@ const TaskInput = () => {
 
     function addTask() {
         if (inputRef.current) {
-            const object: taskType = { id: `${Date.now()}`, text: inputRef.current.value }
+            const object: taskType = { id: `${Date.now()}`, text: value }
             addPendingTasks(object)
-            inputRef.current.value = "";
+            setValue("")
         }
     }
     return (
