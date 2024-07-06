@@ -68,18 +68,18 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col items-center my-20 m-auto gap-8 max-w-[1024px] w-full">
-      <div className='flex flex-row gap-8 items-start w-full'>
-        <div className='flex border rounded-lg flex-col justify-between p-3 w-[calc(66%-16px)] h-[115px]'>
+    <main className="flex flex-col items-center my-20 m-auto gap-8 max-w-[1024px] w-[calc(100%-32px)]">
+      <div className='flex flex-col-reverse sm:flex-row gap-8 items-start w-full'>
+        <div className='flex border rounded-lg flex-col justify-between p-3 w-full sm:w-[calc(66%-16px)] h-[115px]'>
           <span className='text-lg font-bold'>افزودن تسک جدید</span>
           <div className='flex gap-2'>
             <input className='border border-neutral-400 rounded-md p-1 w-full' placeholder='امروز میخوام...' ref={inputRef} />
             <button className='rounded-md bg-purple-900 px-4 py-1 text-white' onClick={addTask}>افزودن</button>
           </div>
         </div>
-        <div className='flex border rounded-lg flex-col gap-1 p-3 w-[calc(33%-16px)] h-[115px]'>
+        <div className='flex border rounded-lg flex-col gap-1 p-3 w-full sm:w-[calc(34%-16px)] h-[115px] min-w-[285px]'>
           <span className='text-base font-bold'>گزارش موفقیت</span>
-          <div className='flex gap-4 items-end'>
+          <div className='flex gap-4 items-end w-full'>
             <SuccessChart completed={completedTasks.length} pending={pendingTasks.length} />
             <div className='flex flex-col gap-1'>
               <span className='text-base font-bold'>{completedTasks.length} از {completedTasks.length + pendingTasks.length}</span>
