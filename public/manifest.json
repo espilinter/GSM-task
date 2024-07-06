@@ -1,0 +1,52 @@
+{
+  "id": "1",
+  "name": "GSM task",
+  "short_name": "GSM task",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#FEFEFE",
+  "background_color": "#FEFEFE",
+  "orientation": "portrait",
+  "description": "برای دسترسی آسان تر می توانید از نسخه pwa وب سایت استفاده کنید",
+  "splash": {
+    "375x812": "./images/react-120.png",
+    "375x667": "./images/react-120.png",
+    "414x736": "./images/react-120.png",
+    "320x568": "./images/react-120.png",
+    "768x1024": "./images/react-310.png",
+    "834x1112": "./images/react-310.png",
+    "1024x1366": "./images/react-310.png"
+  },
+  "icons": [
+    {
+      "src": "./images/react-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/react-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/react-60.png",
+      "sizes": "60x60",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/react-120.png",
+      "sizes": "120x120",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/react-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/react-310.png",
+      "sizes": "310x310",
+      "type": "image/png"
+    }
+  ]
+}
